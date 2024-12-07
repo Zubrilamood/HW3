@@ -1,0 +1,32 @@
+class Person:
+  def __init__(self, name, age):
+      self.name = name
+      self.age = age
+
+  def display_person_info(self):
+      print(f"Name: {self.name}, Age: {self.age}")
+
+class Employee:
+  def __init__(self, position, salary):
+      self.position = position
+      self.salary = salary
+
+  def display_employee_info(self):
+      print(f"Position: {self.position}, Salary: {self.salary}")
+
+class Manager(Person, Employee):
+  def __init__(self, name, age, position, salary, department):
+      
+      super().__init__(name, age)  
+      Employee.__init__(self, position, salary)  
+
+      self.department = department  
+
+  def display_manager_info(self):
+      self.display_person_info()  
+      self.display_employee_info()  
+      print(f"Department: {self.department}") 
+
+manager = Manager("Aldi's", 69, "Manager", 2000, "HQ")
+
+manager.display_manager_info()
