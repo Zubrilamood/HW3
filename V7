@@ -1,0 +1,42 @@
+class GeneratorIterable:
+  def __iter__(self):
+      # Каждый раз при итерации возвращаем новый генератор
+      yield from (i for i in range(3))
+
+# Создадим экземпляр этого класса
+iterable = GeneratorIterable()
+
+# Проходим по итерируемому объекту
+for generator in iterable:
+  # Генератор при каждой итерации возвращает числа 0, 1, 2
+  for value in generator:
+      print(value)
+
+import traceback
+
+# Декоратор для обработки ошибок и логирования
+def calculator_decorator(func):
+    def wrapper(expression):
+        try:
+            # Пытаемся вычислить выражение
+            result = func(expression)
+            print(f"Результат: {result}")
+            return result
+        except Exception as e:
+            # Логируем ошибку и выводим информацию
+            print(f"Произошла ошибка при вычислении выражения: {expression}")
+            print(f"Ошибка: {e}")
+            traceback.print_exc()  # Печать трассировки ошибки для отладки
+            return None  # Возвращаем None, чтобы показать, что произошло что-то плохое
+
+    return wrapper
+
+# Основная функция калькулятора
+@calculator_decorator
+def calculate(expression):
+    return eval(expression)
+
+# Примеры использования
+calculate("10 + 20")         # Правильное выражение
+calculate("10 / 0")          # Ошибка (деление на ноль)
+calculate("10 + 'a'")        # Ошибка (некорректный тип данных)
