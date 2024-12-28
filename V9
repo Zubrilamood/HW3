@@ -1,0 +1,15 @@
+import requests
+from bs4 import BeautifulSoup
+
+url = "https://www.nur.kz/food/recipes/1604632-beshbarmak-recept-klassicheskiy/"
+response = requests.get(url)
+
+soup = BeautifulSoup(response.text, 'html.parser')
+
+
+
+
+recipe_section = soup.find_all('div', class_="font-bold text-2xl")
+
+if recipe_section:
+    print(recipe_section.find_next('p').get_text())
