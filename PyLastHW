@@ -1,0 +1,90 @@
+import sqlite3
+import random
+
+conn = sqlite3.connect('artist_profiles.db')
+cursor = conn.cursor()
+
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS artists (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    age INTEGER NOT NULL,
+    monthly_listens INTEGER NOT NULL
+)
+''')
+
+def add_artist(first_name, last_name, age):
+    monthly_listens = random.randint(1000, 1000000)
+    cursor.execute('''
+    INSERT INTO artists (first_name, last_name, age, monthly_listens)
+    VALUES (?, ?, ?, ?)
+    ''', (first_name, last_name, age, monthly_listens))
+    conn.commit()
+    artist_id = cursor.lastrowid
+    print(f"Добавлен исполнитель: {first_name} {last_name}, ID: {artist_id}, Возраст: {age}, Прослушиваний в месяц: {monthly_listens}")
+    return artist_id
+
+def publish_track(artist_id):
+    cursor.execute('SELECT monthly_listens FROM artists WHERE id = ?', (artist_id,))
+    result = cursor.fetchone()
+    if result:
+        current_listens = result[0]
+        change = 15000 if random.choice([True, False]) else -100000
+        updated_listens = max(0, current_listens + change)
+
+        action = "добавлено 15 000" if change > 0 else "вычтено 100 000"
+        print(f"Для исполнителя с ID {artist_id} текущее количество прослушиваний: {current_listens}. Будет {action}.")
+
+        cursor.execute('UPDATE artists SET monthly_listens = ? WHERE id = ?', (updated_listens, artist_id))
+        conn.commit()
+        print(f"Новое количество прослушиваний: {updated_listens}")
+    else:
+        print(f"Исполнитель с ID {artist_id} не найден.")
+
+def get_all_artists():
+    cursor.execute('SELECT id, first_name, last_name FROM artists')
+    artists = cursor.fetchall()
+    return artists
+
+# Пример использования
+ivan_id = add_artist("Иван", "Иванов", 25)
+maria_id = add_artist("Мария", "Петрова", 30)
+
+while True:
+    print("\nДоступные команды:")
+    print("1. Publish <ID> - опубликовать трек для исполнителя с указанным ID")
+    print("2. List - показать список всех исполнителей")
+    print("3. Exit - выход")
+
+    user_input = input("Введите команду: ").strip().lower().split()
+
+    if not user_input:  # Обработка пустого ввода
+        continue
+
+    command = user_input[0]
+
+    if command == "publish":
+        if len(user_input) > 1:
+            try:
+                artist_id = int(user_input[1])
+                publish_track(artist_id)
+            except ValueError:
+                print("Некорректный ID исполнителя. Введите число.")
+        else:
+            print("Необходимо указать ID исполнителя.")
+    elif command == "list":
+        artists = get_all_artists()
+        if artists:
+            print("Список исполнителей:")
+            for artist_id, first_name, last_name in artists:
+                print(f"ID: {artist_id}, Имя: {first_name} {last_name}")
+        else:
+            print("В базе данных нет исполнителей.")
+
+    elif command == "exit":
+        break
+    else:
+        print("Неизвестная команда.")
+
+conn.close()
