@@ -1,0 +1,27 @@
+import requests
+import sqlite3
+from datetime import datetime
+
+
+api_key = ''
+city = 'Almaty'
+url = f'http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric&lang=ru'
+
+
+response = requests.get(url)
+data = response.json()
+
+
+current_temp = data['main']['temp']
+
+current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+conn = sqlite3.connect('weather_data.db')
+cursor = conn.cursor()
+
+cursor.execute('INSERT INTO weather (температура, дата_время) VALUES (?, ?)', (current_temp, current_time))
+
+conn.commit()
+conn.close()
+
+print(f'Данные сохранены: Температура = {current_temp}°C, Дата и время = {current_time}')
